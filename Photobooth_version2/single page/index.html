@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CDRIN Photobooth</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=PP+Fragment:wght@300&display=swap" />
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <div class="main-container">
+      <div class="rectangle">
+        <video id="video" autoplay playsinline></video>
+        <canvas id="canvas"></canvas>
+      </div>
+
+      <div class="layer">
+        <div class="group">
+          <div class="ans">
+            <div class="vector"></div>
+            <div class="vector-2"></div>
+            <div class="vector-3"></div>
+          </div>
+          <div class="years">
+            <div class="vector-5"></div>
+            <div class="vector-6"></div>
+          </div>
+        </div>
+        <div class="soiree">
+          <div class="vector-8"></div>
+          <div class="vector-9"></div>
+          <div class="vector-a"></div>
+          <div class="vector-b"></div>
+          <div class="vector-c"></div>
+          <div class="vector-d"></div>
+        </div>
+      </div>
+      <div class="logo-cdrin">
+        <div class="vector-e"></div>
+        <div class="vector-f"></div>
+        <div class="vector-10"></div>
+        <div class="vector-11"></div>
+        <div class="vector-12"></div>
+      </div>
+
+      <div id="initial-view">
+        <span class="bienvenue-cdrin">
+          Bienvenue dans l'expérience photo généré par IA entraîné par le CDRIN.
+        </span>
+        <div class="bouton-camera" id="capture-button">
+          <div class="camera-icon">
+            <img src="./Images/CameraIcon.png" alt="Camera Icon" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Vue après capture -->
+      <div id="filter-view" class="hidden">
+        <span class="choose-filter">
+          Choisissez un filtre développé à partir d'une précédente collaboration du CDRIN :
+        </span>
+        <div class="rectangle-13">
+          <div class="traversal-launch"></div>
+          <div class="filter">
+            <span class="title">Style Pixel Art<br /></span
+            ><span class="project">Inspiration projet : <br /> </span
+            ><span class="description">
+              Repousser les limites graphiques, Convergence, Sabotage Studio</span
+            >
+          </div>        
+        </div>
+        <div class="rectangle-14">
+          <div class="traversal-launch-15"></div>
+          <div class="filter">
+            <span class="title">Style Concept Art<br /></span
+            ><span class="project">Inspiration projet : <br /> </span
+            ><span class="description">
+              R&D pour Wild Blueberry Games</span
+            >
+          </div>
+        </div>
+        <div class="rectangle-15">
+          <div class="traversal-launch-19"></div>
+          <div class="filter">
+            <span class="title">Style Impresionniste<br /></span
+            ><span class="project">Inspiration projet : <br /> </span
+            ><span class="description">
+              Preuve de concept pour AgeTeQ, laboraatoire de recherche clinique en santé</span
+            >
+          </div>
+        </div>
+        <div class="rectangle-17" id="restart-button">
+          <div class="camera-icon-small"></div>
+          <span class="recommencer">RECOMMENCER</span>
+        </div>
+      </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
+
+    <script src="app.js"></script>
+  </body>
+</html>
