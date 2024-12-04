@@ -144,7 +144,6 @@ function createLoadingCircle() {
   return loadingContainer;
 }
 
-
 async function handleFilterSelection(element) {
   if (isLoading) return;
   isLoading = true;
@@ -164,19 +163,72 @@ async function handleFilterSelection(element) {
   document.querySelector('.main-container').classList.add('loading-active');
 
   try {
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      if (element === rectangle13) {
+          const response = await fetch('http://localhost:4000/run-stable-diffusion', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              }
+          });
 
-      const img = new Image();
-      await new Promise((resolve, reject) => {
-          img.onload = resolve;
-          img.onerror = reject;
-          img.src = './Images/FilterImage.png';
-      });
+          if (!response.ok) {
+              throw new Error('Erreur lors de l\'exécution du script Python');
+          }
 
-      const mainCanvas = document.getElementById('canvas');
-      const ctx = mainCanvas.getContext('2d');
-      ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
-      ctx.drawImage(img, 0, 0, mainCanvas.width, mainCanvas.height);
+          const result = await response.text();
+          console.log('Résultat du script Python:', result);
+
+          const img = new Image();
+          await new Promise((resolve, reject) => {
+              img.onload = resolve;
+              img.onerror = reject;
+              img.src = 'http://localhost:4000/output-image?' + new Date().getTime();
+          });
+
+          const mainCanvas = document.getElementById('canvas');
+          const rectangleContainer = document.querySelector('.rectangle');
+          const containerHeight = rectangleContainer.clientHeight; 
+          
+          const scale = containerHeight / img.naturalHeight;
+          const scaledWidth = img.naturalWidth * scale;
+          
+          mainCanvas.width = scaledWidth;
+          mainCanvas.height = containerHeight;
+          
+          const ctx = mainCanvas.getContext('2d');
+          ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+          
+          ctx.drawImage(img, 0, 0, scaledWidth, containerHeight);
+
+          mainCanvas.style.position = 'absolute';
+          mainCanvas.style.left = '50%';
+          mainCanvas.style.transform = 'translateX(-50%)';
+          mainCanvas.style.height = '100%'; 
+          mainCanvas.style.objectFit = 'cover';
+          mainCanvas.style.margin = '0';
+          mainCanvas.style.padding = '0';
+          mainCanvas.style.display = 'block'; 
+
+          rectangleContainer.style.overflow = 'hidden';
+          rectangleContainer.style.padding = '0';
+          rectangleContainer.style.margin = '0';
+          rectangleContainer.style.display = 'flex';
+          rectangleContainer.style.alignItems = 'center';
+          rectangleContainer.style.justifyContent = 'center';
+
+      } else {
+          const img = new Image();
+          await new Promise((resolve, reject) => {
+              img.onload = resolve;
+              img.onerror = reject;
+              img.src = './Images/FilterImage.png';
+          });
+
+          const mainCanvas = document.getElementById('canvas');
+          const ctx = mainCanvas.getContext('2d');
+          ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+          ctx.drawImage(img, 0, 0, mainCanvas.width, mainCanvas.height);
+      }
 
       const qrContainer = createQRContainer();
       await generateQRCode(fileName);
