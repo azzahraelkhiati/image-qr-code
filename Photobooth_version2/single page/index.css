@@ -354,9 +354,8 @@ button {
   width: 732px;
   height: 894px;
   top: 93px;
-  left: 840px;
+  left: 750px;
   background: #d9d9d9;
-  overflow: hidden;
 }
 
 /* Vue des filtres */
@@ -378,54 +377,41 @@ button {
   z-index: 17;
 }
 
-.rectangle-13 {
+.rectangle-13, .rectangle-14 {
   position: absolute;
-  width: 243.144px;
-  height: 350.165px;
+  width: 233.144px;
+  height: 316.165px;
+  border: 0.93px solid #ffffff;
+}
+
+.rectangle-13 {
   top: 481px;
-  left: 301px;
-  border: 1px solid #ffffff;
+  left: 321px;
   z-index: 21;
-  cursor: pointer;
+}
+
+.rectangle-14 {
+  top: 481px;
+  left: 41px;
+  z-index: 25;
 }
 
 .traversal-launch {
   position: relative;
   width: 201.406px;
-  height: 195.554px;
-  margin: 17px 0 0 16px;
-  background: url(./Images/FilterImage.png);
+  height: 185.554px;
+  margin: 13.987px 0 0 15.851px;
+  background: url(./Images/pixel-art.png) no-repeat center;
   background-size: cover;
-}
-
-.rectangle-14 {
-  position: absolute;
-  width: 243.144px;
-  height: 350.165px;
-  top: 481px;
-  left: 41px;
-  border: 1px solid #ffffff;
-  cursor: pointer;
 }
 
 .traversal-launch-15 {
   position: relative;
   width: 201.406px;
-  height: 195.554px;
-  margin: 17px 0 0 16px;
-  background: url(./Images/FilterImage.png);
+  height: 185.554px;
+  margin: 13.987px 0 0 15.851px;
+  background: url(./Images/squido.png) no-repeat center;
   background-size: cover;
-}
-
-.rectangle-15 {
-  position: absolute;
-  width: 243.144px;
-  height: 350.165px;
-  top: 481px;
-  left: 561px;
-  border: 1px solid #ffffff;
-  z-index: 21;
-  cursor: pointer;
 }
 
 .traversal-launch-19 {
@@ -442,38 +428,50 @@ button {
   padding: 16px;
 }
 
-.title {
+.style-inspiration-projet {
+  position: relative;
+  width: 206.986px;
+  height: 85.296px;
+  margin: 4.966px 0 0 14.785px;
+  font-family: Inter, var(--default-font-family);
+  line-height: 22.569px;
+  text-align: left;
+}
+
+.style-impresionniste {
   position: relative;
   color: #ffffff;
   font-family: PP Fragment, var(--default-font-family);
   font-size: 18.648656845092773px;
   font-weight: 400;
-  line-height: 18px;
+  line-height: 22.569px;
   text-align: left;
-  margin-bottom: 12px; 
-  display: block; 
+  display: block;
 }
 
-.project {
+.inspiration-projet {
   position: relative;
   color: #ffffff;
   font-family: PP Fragment, var(--default-font-family);
   font-size: 13.054059982299805px;
   font-weight: 400;
-  line-height: 18px;
+  line-height: 22.569px;
   text-align: left;
+  display: block;
 }
 
-.description {
+.preuve-de-concept {
   position: relative;
   color: #ffffff;
   font-family: PP Fragment, var(--default-font-family);
   font-size: 13.054059982299805px;
   font-weight: 300;
-  line-height: 1.2;
-  text-align: justify;
-  margin-bottom: 2px;
+  line-height: 22.569px;
+  text-align: left;
+  display: block;
 }
+
+
 
 .recommencer {
   display: flex;
@@ -497,15 +495,11 @@ button {
   position: absolute;
   width: 403.634px;
   height: 113.939px;
-  top: 868px;
-  left: 41px;
+  top: 871px;
+  left: 26px; 
   border: 1px solid #ffffff;
   border-radius: 80px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  padding-left: 30px;
-  gap: 12px;
+  z-index: 38;
 }
 
 .camera-icon-small {
@@ -591,7 +585,7 @@ button {
   width: 60px;
   height: 60px;
   z-index: 2;
-  animation: spin 1.5s linear infinite; /* Durée de 1.5s, boucle infinie */
+  animation: spin 1.5s linear infinite; 
 }
 
 
@@ -608,9 +602,12 @@ button {
   background-color: #FFFDA9 !important;
 }
 
-.rectangle-13.selected .title, .rectangle-14.selected .title, .rectangle-15.selected .title,
-.rectangle-13.selected .project, .rectangle-14.selected .project, .rectangle-15.selected .project,
-.rectangle-13.selected .description, .rectangle-14.selected .description, .rectangle-15.selected .description {
+.rectangle-13.selected .style-impresionniste,
+.rectangle-13.selected .inspiration-projet,
+.rectangle-13.selected .preuve-de-concept,
+.rectangle-14.selected .style-impresionniste,
+.rectangle-14.selected .inspiration-projet,
+.rectangle-14.selected .preuve-de-concept {
   color: #000000;
 }
 

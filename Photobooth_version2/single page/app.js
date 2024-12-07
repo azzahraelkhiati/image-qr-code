@@ -7,14 +7,12 @@ const filterView = document.getElementById('filter-view');
 const context = canvas.getContext('2d');
 const rectangle13 = document.querySelector('.rectangle-13');
 const rectangle14 = document.querySelector('.rectangle-14');
-const rectangle15 = document.querySelector('.rectangle-15');
 
 
-let selfieSegmentation;
-let isMediaPipeReady = false;
 let currentStream = null;
 let isLoading = false;
 let selectedFilter = null;
+let currentImageName = null;
 
 const cameraConfig = {
     video: {
@@ -42,317 +40,211 @@ function createQRContainer() {
 }
 
 async function generateQRCode(fileName) {
-  const qrCodeScript = document.createElement('script');
-  qrCodeScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
-  document.head.appendChild(qrCodeScript);
+    const qrCodeScript = document.createElement('script');
+    qrCodeScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+    document.head.appendChild(qrCodeScript);
 
-  await new Promise(resolve => (qrCodeScript.onload = resolve));
+    await new Promise(resolve => (qrCodeScript.onload = resolve));
 
-  const qrCodeContainer = document.querySelector('.qr-code-box');
-  qrCodeContainer.innerHTML = ''; 
+    const qrCodeContainer = document.querySelector('.qr-code-box');
+    qrCodeContainer.innerHTML = ''; 
 
-  const rawDownloadUrl = `https://raw.githubusercontent.com/azzahraelkhiati/image-qr-code/main/${fileName}`;
-  const encodedDownloadUrl = `${rawDownloadUrl}?dl=1`; 
+    const rawDownloadUrl = `https://raw.githubusercontent.com/azzahraelkhiati/image-qr-code/main/${fileName}`;
+    const encodedDownloadUrl = `${rawDownloadUrl}?dl=1`; 
 
-  new QRCode(qrCodeContainer, {
-      text: encodedDownloadUrl,
-      width: 335,
-      height: 335,
-      colorDark: '#000000',
-      colorLight: '#FFFFFF',
-      correctLevel: QRCode.CorrectLevel.H,
-  });
-}
-
-
-async function initMediaPipe() {
-    selfieSegmentation = new SelfieSegmentation({
-        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`
+    new QRCode(qrCodeContainer, {
+        text: encodedDownloadUrl,
+        width: 335,
+        height: 335,
+        colorDark: '#000000',
+        colorLight: '#FFFFFF',
+        correctLevel: QRCode.CorrectLevel.H,
     });
-
-    selfieSegmentation.setOptions({
-        modelSelection: 1 
-    });
-
-    selfieSegmentation.onResults((results) => {
-        if (results.segmentationMask && !isLoading) {
-            processMask(results);
-        }
-    });
-
-    await selfieSegmentation.initialize();
-    isMediaPipeReady = true;
-}
-
-function processMask(results) {
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = canvas.width;
-    tempCanvas.height = canvas.height;
-    const tempCtx = tempCanvas.getContext('2d');
-
-    tempCtx.drawImage(results.segmentationMask, 0, 0, tempCanvas.width, tempCanvas.height);
-
-    const maskImageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-    const maskData = maskImageData.data;
-
-    tempCtx.drawImage(results.image, 0, 0, tempCanvas.width, tempCanvas.height);
-    const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-    const pixels = imageData.data;
-
-    for (let i = 0; i < maskData.length; i += 4) {
-        const maskValue = maskData[i];
-        if (maskValue < 220) {
-            maskData[i] = 0;
-            maskData[i + 1] = 0;
-            maskData[i + 2] = 0;
-            maskData[i + 3] = 0;
-        }
-    }
-
-    tempCtx.putImageData(maskImageData, 0, 0);
-    tempCtx.filter = 'blur(-50px)';
-    tempCtx.drawImage(tempCanvas, 0, 0);
-
-    const blurredMaskImageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-    const blurredMaskData = blurredMaskImageData.data;
-
-    for (let i = 0; i < pixels.length; i += 4) {
-        const maskValue = blurredMaskData[i];
-        if (maskValue < 200) {
-            pixels[i + 3] = 0;
-        }
-    }
-
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    context.putImageData(imageData, 0, 0);
 }
 
 function createLoadingCircle() {
-  const loadingContainer = document.createElement('div');
-  loadingContainer.className = 'loading-container';
+    const loadingContainer = document.createElement('div');
+    loadingContainer.className = 'loading-container';
 
-  const loadingBackground = document.createElement('div');
-  loadingBackground.className = 'loading-background';
+    const loadingBackground = document.createElement('div');
+    loadingBackground.className = 'loading-background';
 
-  const loadingImage = document.createElement('img');
-  loadingImage.src = './Images/Loading.png';
-  loadingImage.className = 'loading-image';
+    const loadingImage = document.createElement('img');
+    loadingImage.src = './Images/Loading.png';
+    loadingImage.className = 'loading-image';
 
-  loadingContainer.appendChild(loadingBackground);
-  loadingContainer.appendChild(loadingImage);
+    loadingContainer.appendChild(loadingBackground);
+    loadingContainer.appendChild(loadingImage);
 
-  return loadingContainer;
+    return loadingContainer;
 }
 
 async function handleFilterSelection(element) {
-  if (isLoading) return;
-  isLoading = true;
+    if (isLoading) return;
+    isLoading = true;
 
-  if (selectedFilter) {
-      selectedFilter.classList.remove('selected');
-      selectedFilter.style.backgroundColor = '';
-  }
+    if (selectedFilter) {
+        selectedFilter.classList.remove('selected');
+        selectedFilter.style.backgroundColor = '';
+    }
 
-  element.classList.add('selected');
-  selectedFilter = element;
+    element.classList.add('selected');
+    selectedFilter = element;
 
-  const mainRectangle = document.querySelector('.rectangle');
-  const loadingCircleContainer = createLoadingCircle();
-  mainRectangle.appendChild(loadingCircleContainer);
+    const mainRectangle = document.querySelector('.rectangle');
+    const loadingCircleContainer = createLoadingCircle();
+    mainRectangle.appendChild(loadingCircleContainer);
 
-  document.querySelector('.main-container').classList.add('loading-active');
+    document.querySelector('.main-container').classList.add('loading-active');
 
-  try {
-      if (element === rectangle13) {
-          const response = await fetch('http://localhost:4000/run-stable-diffusion', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json'
-              }
-          });
+    try {
+        const scriptEndpoint =
+            element === rectangle13
+                ? 'http://localhost:4000/run-stable-diffusion'
+                : element === rectangle14
+                    ? 'http://localhost:4000/run-stable-diffusion-squido'
+                    : null;
 
-          if (!response.ok) {
-              throw new Error('Erreur lors de l\'exécution du script Python');
-          }
+        if (scriptEndpoint) {
+            const response = await fetch(scriptEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
 
-          const result = await response.text();
-          console.log('Résultat du script Python:', result);
+            if (!response.ok) {
+                throw new Error('Erreur lors de l\'exécution du script Python');
+            }
 
-          const img = new Image();
-          await new Promise((resolve, reject) => {
-              img.onload = resolve;
-              img.onerror = reject;
-              img.src = 'http://localhost:4000/output-image?' + new Date().getTime();
-          });
+            const result = await response.json();
+            console.log('Résultat du script Python:', result);
 
-          const mainCanvas = document.getElementById('canvas');
-          const rectangleContainer = document.querySelector('.rectangle');
-          const containerHeight = rectangleContainer.clientHeight; 
-          
-          const scale = containerHeight / img.naturalHeight;
-          const scaledWidth = img.naturalWidth * scale;
-          
-          mainCanvas.width = scaledWidth;
-          mainCanvas.height = containerHeight;
-          
-          const ctx = mainCanvas.getContext('2d');
-          ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
-          
-          ctx.drawImage(img, 0, 0, scaledWidth, containerHeight);
+            await new Promise(resolve => setTimeout(resolve, 1000));
 
-          mainCanvas.style.position = 'absolute';
-          mainCanvas.style.left = '50%';
-          mainCanvas.style.transform = 'translateX(-50%)';
-          mainCanvas.style.height = '100%'; 
-          mainCanvas.style.objectFit = 'cover';
-          mainCanvas.style.margin = '0';
-          mainCanvas.style.padding = '0';
-          mainCanvas.style.display = 'block'; 
+            const img = new Image();
+            await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+                img.src = `http://localhost:4000/output-image?${Date.now()}`;
+            });
 
-          rectangleContainer.style.overflow = 'hidden';
-          rectangleContainer.style.padding = '0';
-          rectangleContainer.style.margin = '0';
-          rectangleContainer.style.display = 'flex';
-          rectangleContainer.style.alignItems = 'center';
-          rectangleContainer.style.justifyContent = 'center';
+            const mainCanvas = document.getElementById('canvas');
+            const rectangleContainer = document.querySelector('.rectangle');
+            const containerHeight = rectangleContainer.clientHeight;
 
-      } else {
-          const img = new Image();
-          await new Promise((resolve, reject) => {
-              img.onload = resolve;
-              img.onerror = reject;
-              img.src = './Images/FilterImage.png';
-          });
+            const scale = containerHeight / img.naturalHeight;
+            const scaledWidth = img.naturalWidth * scale;
 
-          const mainCanvas = document.getElementById('canvas');
-          const ctx = mainCanvas.getContext('2d');
-          ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
-          ctx.drawImage(img, 0, 0, mainCanvas.width, mainCanvas.height);
-      }
+            mainCanvas.width = scaledWidth;
+            mainCanvas.height = containerHeight;
 
-      const qrContainer = createQRContainer();
-      await generateQRCode(fileName);
+            const ctx = mainCanvas.getContext('2d');
+            ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+            ctx.drawImage(img, 0, 0, scaledWidth, containerHeight);
 
-  } catch (error) {
-      console.error('Erreur lors du chargement:', error);
-  } finally {
-      loadingCircleContainer.remove();
-      isLoading = false;
-      document.querySelector('.main-container').classList.remove('loading-active');
-  }
+            mainCanvas.style.position = 'absolute';
+            mainCanvas.style.left = '50%';
+            mainCanvas.style.transform = 'translateX(-50%)';
+            mainCanvas.style.height = '100%';
+            mainCanvas.style.objectFit = 'cover';
+            mainCanvas.style.margin = '0';
+            mainCanvas.style.padding = '0';
+            mainCanvas.style.display = 'block';
+
+            const qrContainer = createQRContainer();
+            if (result && result.fileName) {
+                await generateQRCode(result.fileName);
+            }
+        }
+    } catch (error) {
+        console.error('Erreur lors du chargement:', error);
+    } finally {
+        loadingCircleContainer.remove();
+        isLoading = false;
+        document.querySelector('.main-container').classList.remove('loading-active');
+    }
 }
 
 async function pushImageToGit(imageData, fileName) {
-  console.log('pushImageToGit() appelée avec :', { fileName, imageData });
-
-  try {
-      const response = await fetch('http://localhost:4000/upload', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imageData, fileName }),
-      });
-
-      console.log('Requête envoyée, en attente de réponse...');
-
-      if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Erreur dans la réponse du backend :', errorText);
-          throw new Error(errorText);
-      }
-
-      const responseText = await response.text();
-      console.log('Réponse du backend :', responseText);
-  } catch (error) {
-      console.error('Erreur lors de l\'envoi au backend :', error);
-  }
-}
-
-
-const fileName = `image-${Date.now()}.png`;
-async function takePicture() {
-  if (!selfieSegmentation) {
-    await initMediaPipe();
-  }
-
-  createCountdownCircle(async () => {
-    createFlashEffect();
-
-    const containerWidth = 732;
-    const containerHeight = 894;
-
-    canvas.width = containerWidth;
-    canvas.height = containerHeight;
-
     try {
-      const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = containerWidth;
-      tempCanvas.height = containerHeight;
-      const tempCtx = tempCanvas.getContext('2d');
+        const response = await fetch('http://localhost:4000/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imageData, fileName }),
+        });
 
-      const videoRatio = video.videoWidth / video.videoHeight;
-      const containerRatio = containerWidth / containerHeight;
-
-      let sourceX, sourceY, sourceWidth, sourceHeight;
-
-      if (videoRatio > containerRatio) {
-        sourceHeight = video.videoHeight;
-        sourceWidth = sourceHeight * containerRatio;
-        sourceX = (video.videoWidth - sourceWidth) / 2;
-        sourceY = 0;
-      } else {
-        sourceWidth = video.videoWidth;
-        sourceHeight = sourceWidth / containerRatio;
-        sourceX = 0;
-        sourceY = (video.videoHeight - sourceHeight) / 2;
-      }
-
-      tempCtx.drawImage(
-        video,
-        sourceX, sourceY, sourceWidth, sourceHeight,
-        0, 0, containerWidth, containerHeight
-      );
-
-      await selfieSegmentation.send({ image: tempCanvas });
-
-      video.style.display = 'none';
-      canvas.style.display = 'block';
-
-      const imageData = canvas.toDataURL('image/png');
-
-      await pushImageToGit(imageData, fileName);
-
-      if (selectedFilter) {
-        selectedFilter.classList.remove('selected');
-        selectedFilter.style.backgroundColor = '';
-        selectedFilter = null;
-      }
-
-      switchToFilterView();
-    } catch (error) {
-      console.error('Erreur lors de la capture:', error);
-    }
-  });
-}
-
-
-async function startCamera() {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia(cameraConfig);
-        video.srcObject = stream;
-        currentStream = stream;
-
-        video.style.display = 'block';
-        canvas.style.display = 'none';
-
-        await new Promise((resolve) => (video.onloadedmetadata = resolve));
-        adjustVideoDisplay();
-
-        if (!isMediaPipeReady) {
-            await initMediaPipe();
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText);
         }
-    } catch (err) {
-        console.error('Erreur lors de l\'accès à la caméra:', err);
+
+        const responseText = await response.text();
+        console.log('Réponse du backend :', responseText);
+    } catch (error) {
+        console.error('Erreur lors de l\'envoi au backend :', error);
     }
+}
+
+async function takePicture() {
+    createCountdownCircle(async () => {
+        createFlashEffect();
+
+        const containerWidth = 732;
+        const containerHeight = 894;
+
+        canvas.width = containerWidth;
+        canvas.height = containerHeight;
+
+        try {
+            const videoRatio = video.videoWidth / video.videoHeight;
+            const containerRatio = containerWidth / containerHeight;
+
+            let sourceX, sourceY, sourceWidth, sourceHeight;
+
+            if (videoRatio > containerRatio) {
+                sourceHeight = video.videoHeight;
+                sourceWidth = sourceHeight * containerRatio;
+                sourceX = (video.videoWidth - sourceWidth) / 2;
+                sourceY = 0;
+            } else {
+                sourceWidth = video.videoWidth;
+                sourceHeight = sourceWidth / containerRatio;
+                sourceX = 0;
+                sourceY = (video.videoHeight - sourceHeight) / 2;
+            }
+
+            context.drawImage(
+                video,
+                sourceX, sourceY, sourceWidth, sourceHeight,
+                0, 0, containerWidth, containerHeight
+            );
+
+            const fileName = `image_${Date.now()}.png`;
+            const imageData = canvas.toDataURL('image/png');
+            await pushImageToGit(imageData, fileName);
+
+            video.style.display = 'none';
+            canvas.style.display = 'block';
+
+            switchToFilterView();
+        } catch (error) {
+            console.error('Erreur lors de la capture:', error);
+        }
+    });
+}
+
+function startCamera() {
+    return navigator.mediaDevices.getUserMedia(cameraConfig)
+        .then(stream => {
+            video.srcObject = stream;
+            currentStream = stream;
+            video.style.display = 'block';
+            canvas.style.display = 'none';
+            return new Promise(resolve => video.onloadedmetadata = resolve);
+        })
+        .then(adjustVideoDisplay)
+        .catch(err => console.error('Erreur lors de l\'accès à la caméra:', err));
 }
 
 function adjustVideoDisplay() {
@@ -387,7 +279,7 @@ function createFlashEffect() {
 
 function stopCamera() {
     if (currentStream) {
-        currentStream.getTracks().forEach((track) => track.stop());
+        currentStream.getTracks().forEach(track => track.stop());
         currentStream = null;
     }
 }
@@ -398,62 +290,41 @@ function switchToFilterView() {
 }
 
 function restartPhoto() {
-    canvas.style.display = 'none';
-    context.clearRect(0, 0, canvas.width, canvas.height);
-
-    const qrContainer = document.querySelector('.qr-container');
-    if (qrContainer) {
-        qrContainer.remove();
-    }
-    
-    startCamera();
-    filterView.classList.add('hidden');
-    initialView.classList.remove('hidden');
-    
-    if (selectedFilter) {
-        selectedFilter.classList.remove('selected');
-        selectedFilter.style.backgroundColor = '';
-        selectedFilter = null;
-    }
+    window.location.reload();
 }
 
 function createCountdownCircle(onComplete) {
-  const loadingContainer = document.createElement('div');
-  loadingContainer.className = 'loading-container';
+    const loadingContainer = document.createElement('div');
+    loadingContainer.className = 'loading-container';
 
-  const loadingBackground = document.createElement('div');
-  loadingBackground.className = 'loading-background';
+    const loadingBackground = document.createElement('div');
+    loadingBackground.className = 'loading-background';
 
-  const countdownText = document.createElement('span');
-  countdownText.className = 'countdown-text';
-  countdownText.textContent = '5';
+    const countdownText = document.createElement('span');
+    countdownText.className = 'countdown-text';
+    countdownText.textContent = '5';
 
-  loadingContainer.appendChild(loadingBackground);
-  loadingContainer.appendChild(countdownText);
+    loadingContainer.appendChild(loadingBackground);
+    loadingContainer.appendChild(countdownText);
 
-  const mainRectangle = document.querySelector('.rectangle'); 
-  mainRectangle.appendChild(loadingContainer);
+    const mainRectangle = document.querySelector('.rectangle');
+    mainRectangle.appendChild(loadingContainer);
 
-  let count = 5;
-  const interval = setInterval(() => {
-    count--;
-    if (count > 0) {
-      countdownText.textContent = count;
-    } else {
-      clearInterval(interval);
-      loadingContainer.remove(); 
-      onComplete();
-    }
-  }, 1000);
+    let count = 5;
+    const interval = setInterval(() => {
+        count--;
+        if (count > 0) {
+            countdownText.textContent = count;
+        } else {
+            clearInterval(interval);
+            loadingContainer.remove();
+            onComplete();
+        }
+    }, 1000);
 }
 
-
 window.addEventListener('load', startCamera);
-captureButton.addEventListener('click', () => {
-  console.log('Bouton capture cliqué');
-  takePicture();
-});
+captureButton.addEventListener('click', takePicture);
 restartButton.addEventListener('click', restartPhoto);
 rectangle13.addEventListener('click', () => handleFilterSelection(rectangle13));
 rectangle14.addEventListener('click', () => handleFilterSelection(rectangle14));
-rectangle15.addEventListener('click', () => handleFilterSelection(rectangle15));
