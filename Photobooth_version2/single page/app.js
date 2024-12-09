@@ -205,19 +205,20 @@ async function takePicture() {
             if (videoRatio > containerRatio) {
                 sourceHeight = video.videoHeight;
                 sourceWidth = sourceHeight * containerRatio;
-                sourceX = (video.videoWidth - sourceWidth) / 2;
+                sourceX = (video.videoWidth - sourceWidth) / 2; 
                 sourceY = 0;
             } else {
                 sourceWidth = video.videoWidth;
                 sourceHeight = sourceWidth / containerRatio;
                 sourceX = 0;
-                sourceY = (video.videoHeight - sourceHeight) / 2;
+                sourceY = (video.videoHeight - sourceHeight) / 2; 
             }
 
+            context.clearRect(0, 0, containerWidth, containerHeight); 
             context.drawImage(
                 video,
                 sourceX, sourceY, sourceWidth, sourceHeight,
-                0, 0, containerWidth, containerHeight
+                0, 0, containerWidth, containerHeight 
             );
 
             const fileName = `image_${Date.now()}.png`;
@@ -233,6 +234,7 @@ async function takePicture() {
         }
     });
 }
+
 
 function startCamera() {
     return navigator.mediaDevices.getUserMedia(cameraConfig)
