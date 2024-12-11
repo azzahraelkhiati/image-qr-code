@@ -178,7 +178,7 @@ async function takePicture() {
         try {
             context.clearRect(0, 0, containerWidth, containerHeight);
             
-            // Calculer les dimensions pour maintenir le ratio
+            // Calculate dimensions for maintaining ratio
             const videoRatio = video.videoWidth / video.videoHeight;
             const containerRatio = containerWidth / containerHeight;
             
@@ -200,6 +200,10 @@ async function takePicture() {
             const fileName = `image_${Date.now()}.png`;
             const imageData = canvas.toDataURL('image/png');
 
+            // Hide video and show canvas
+            video.style.display = 'none';
+            canvas.style.display = 'block';
+
             const pushedFileName = await pushImageToGit(imageData, fileName);
             currentImageName = pushedFileName;
 
@@ -209,13 +213,19 @@ async function takePicture() {
                 generateQRCode(currentImageName);
             }
 
-            video.style.display = 'none';
-            canvas.style.display = 'block';
-
         } catch (error) {
             console.error('Erreur lors de la capture:', error);
         }
     });
+}
+
+function restartPhoto() {
+    capturedView.classList.add('hidden');
+    initialView.classList.remove('hidden');
+    video.style.display = 'block';
+    canvas.style.display = 'none';
+    stopCamera();
+    startCamera();
 }
 
 function stopCamera() {
@@ -231,14 +241,6 @@ function switchToCapturedView() {
     createQRContainer(); // Préparation du container QR
 }
 
-function restartPhoto() {
-    capturedView.classList.add('hidden');
-    initialView.classList.remove('hidden');
-    video.style.display = 'block';
-    canvas.style.display = 'none';
-    stopCamera();
-    startCamera();
-}
 
 window.addEventListener('load', startCamera);
 captureButton.addEventListener('click', takePicture);
