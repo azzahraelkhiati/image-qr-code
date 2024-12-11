@@ -130,67 +130,6 @@ function createFlashEffect() {
     setTimeout(() => flash.remove(), 500);
 }
 
-async function takePicture() {
-    createCountdownCircle(async () => {
-        createFlashEffect();
-
-        const containerWidth = 732;
-        const containerHeight = 894;
-
-        canvas.width = containerWidth;
-        canvas.height = containerHeight;
-
-        try {
-            const videoRatio = video.videoWidth / video.videoHeight;
-            const containerRatio = containerWidth / containerHeight;
-
-            let sourceX, sourceY, sourceWidth, sourceHeight;
-
-            if (videoRatio > containerRatio) {
-                sourceHeight = video.videoHeight;
-                sourceWidth = sourceHeight * containerRatio;
-                sourceX = (video.videoWidth - sourceWidth) / 2; 
-                sourceY = 0;
-            } else {
-                sourceWidth = video.videoWidth;
-                sourceHeight = sourceWidth / containerRatio;
-                sourceX = 0;
-                sourceY = (video.videoHeight - sourceHeight) / 2; 
-            }
-
-            context.clearRect(0, 0, containerWidth, containerHeight); 
-            context.drawImage(
-                video,
-                sourceX, sourceY, sourceWidth, sourceHeight,
-                0, 0, containerWidth, containerHeight 
-            );
-
-            await overlayLogo(); // Superposition du logo
-
-            const fileName = `image_${Date.now()}.png`;
-            const imageData = canvas.toDataURL('image/png');
-
-            // Upload et push sur Git
-            const pushedFileName = await pushImageToGit(imageData, fileName);
-            currentImageName = pushedFileName; 
-
-            // On affiche la vue "captured"
-            switchToCapturedView();
-
-            // Génération du QR code pour l'image poussée
-            if (currentImageName) {
-                generateQRCode(currentImageName);
-            }
-
-            video.style.display = 'none';
-            canvas.style.display = 'block';
-
-        } catch (error) {
-            console.error('Erreur lors de la capture:', error);
-        }
-    });
-}
-
 function startCamera() {
     return navigator.mediaDevices.getUserMedia(cameraConfig)
         .then(stream => {
@@ -205,26 +144,78 @@ function startCamera() {
 }
 
 function adjustVideoDisplay() {
-    const containerWidth = 732;
-    const containerHeight = 894;
+    const container = document.querySelector('.rectangle');
+    const containerWidth = container.offsetWidth;
+    const containerHeight = container.offsetHeight;
+    
     const videoRatio = video.videoWidth / video.videoHeight;
     const containerRatio = containerWidth / containerHeight;
 
     if (videoRatio > containerRatio) {
         const scale = containerHeight / video.videoHeight;
         const width = video.videoWidth * scale;
-        video.style.width = `${width}px`;
-        video.style.height = `${containerHeight}px`;
-        video.style.left = `${-(width - containerWidth) / 2}px`;
-        video.style.top = '0';
+        video.style.width = 'auto';
+        video.style.height = '100%';
     } else {
         const scale = containerWidth / video.videoWidth;
         const height = video.videoHeight * scale;
-        video.style.width = `${containerWidth}px`;
-        video.style.height = `${height}px`;
-        video.style.top = `${-(height - containerHeight) / 2}px`;
-        video.style.left = '0';
+        video.style.width = '100%';
+        video.style.height = 'auto';
     }
+}
+
+async function takePicture() {
+    createCountdownCircle(async () => {
+        createFlashEffect();
+
+        const container = document.querySelector('.rectangle');
+        const containerWidth = container.offsetWidth;
+        const containerHeight = container.offsetHeight;
+
+        canvas.width = containerWidth;
+        canvas.height = containerHeight;
+
+        try {
+            context.clearRect(0, 0, containerWidth, containerHeight);
+            
+            // Calculer les dimensions pour maintenir le ratio
+            const videoRatio = video.videoWidth / video.videoHeight;
+            const containerRatio = containerWidth / containerHeight;
+            
+            let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
+            
+            if (videoRatio > containerRatio) {
+                drawHeight = containerHeight;
+                drawWidth = drawHeight * videoRatio;
+                offsetX = -(drawWidth - containerWidth) / 2;
+            } else {
+                drawWidth = containerWidth;
+                drawHeight = drawWidth / videoRatio;
+                offsetY = -(drawHeight - containerHeight) / 2;
+            }
+            
+            context.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
+            await overlayLogo();
+
+            const fileName = `image_${Date.now()}.png`;
+            const imageData = canvas.toDataURL('image/png');
+
+            const pushedFileName = await pushImageToGit(imageData, fileName);
+            currentImageName = pushedFileName;
+
+            switchToCapturedView();
+
+            if (currentImageName) {
+                generateQRCode(currentImageName);
+            }
+
+            video.style.display = 'none';
+            canvas.style.display = 'block';
+
+        } catch (error) {
+            console.error('Erreur lors de la capture:', error);
+        }
+    });
 }
 
 function stopCamera() {
