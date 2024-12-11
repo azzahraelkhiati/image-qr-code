@@ -201,14 +201,22 @@ async function takePicture() {
             // Stop the camera stream after capturing
             stopCamera();
             
-            // Hide video and show canvas with captured image
+            // Hide video
             video.style.display = 'none';
+            
+            // Show canvas and ensure it's positioned correctly
             canvas.style.display = 'block';
+            canvas.style.position = 'absolute';
+            canvas.style.top = '0';
+            canvas.style.left = '0';
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            canvas.style.objectFit = 'contain';
 
             const pushedFileName = await pushImageToGit(imageData, fileName);
             currentImageName = pushedFileName;
 
-            // Switch to captured view while keeping the canvas visible
+            // Switch views while keeping canvas visible
             initialView.classList.add('hidden');
             capturedView.classList.remove('hidden');
 
@@ -231,7 +239,6 @@ function stopCamera() {
 }
 
 function restartPhoto() {
-    // Remove QR container if it exists
     const qrContainer = document.querySelector('.qr-container');
     if (qrContainer) {
         qrContainer.remove();
@@ -239,7 +246,11 @@ function restartPhoto() {
     
     capturedView.classList.add('hidden');
     initialView.classList.remove('hidden');
+    
+    // Reset canvas styles and hide it
     canvas.style.display = 'none';
+    
+    // Start the camera again
     startCamera();
 }
 
