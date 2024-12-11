@@ -456,6 +456,9 @@ button {
   height: 100%;
 }
 
+/* ... styles existants ... */
+
+/* Bouton Recommencer dans la vue capturée */
 .restart-button {
   position: absolute;
   top: 20px;
