@@ -45,7 +45,7 @@
 
       <div id="initial-view">
         <span class="bienvenue-cdrin">
-          Bienvenue dans l'expérience photo généré par IA entraîné par le CDRIN.
+          Bienvenue dans l'expérience photo générée par IA entraînée par le CDRIN.
         </span>
         <div class="bouton-camera" id="capture-button">
           <div class="camera-icon">
@@ -54,38 +54,15 @@
         </div>
       </div>
 
-      <!-- Vue après capture -->
-      <div id="filter-view" class="hidden">
-        <span class="choose-filter">
-          Choisissez un filtre développé à partir d'une précédente collaboration du CDRIN :
-        </span>
-        <div class="rectangle-13">
-          <div class="traversal-launch"></div>
-          <div class="style-inspiration-projet">
-            <span class="style-impresionniste">Style 3D Art<br /></span>
-            <span class="inspiration-projet">Inspiration projet : <br /></span>
-            <span class="preuve-de-concept">
-              R&D pour Squido Studio
-            </span>
-          </div>
-        </div>
-        
-        <div class="rectangle-14">
-          <div class="traversal-launch-15"></div>
-          <div class="style-inspiration-projet">
-            <span class="style-impresionniste">Style Pixel Art<br /></span>
-            <span class="inspiration-projet">Inspiration projet : <br /></span>
-            <span class="preuve-de-concept">
-              R&D pour Sabotage Studio
-            </span>
-          </div>
-        </div>
-        <div class="rectangle-17" id="restart-button">
-          <div class="camera-icon-small"></div>
+      <!-- Nouvelle Vue après capture avec logo et bouton Recommencer -->
+      <div id="captured-view" class="hidden">
+        <canvas id="captured-canvas"></canvas>
+        <div class="restart-button" id="restart-button">
           <span class="recommencer">RECOMMENCER</span>
         </div>
       </div>
 
+    </div>
     <script src="app.js"></script>
   </body>
 </html>

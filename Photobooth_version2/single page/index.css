@@ -358,6 +358,261 @@ button {
   background: #d9d9d9;
 }
 
+:root {
+  --default-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Ubuntu, "Helvetica Neue", Helvetica, Arial, "PingFang SC",
+    "Hiragino Sans GB", "Microsoft Yahei UI", "Microsoft Yahei",
+    "Source Han Sans CN", sans-serif;
+}
+
+.main-container {
+  overflow: hidden;
+  position: relative;
+  width: 1980px;
+  height: 1114px;
+  margin: 0 auto;
+  background: #000000;
+  overflow: hidden;
+}
+
+.main-container,
+.main-container * {
+  box-sizing: border-box;
+}
+
+input,
+select,
+textarea,
+button {
+  outline: 0;
+}
+
+#video {
+  position: absolute;
+  object-fit: cover;
+}
+
+#canvas, #captured-canvas {
+  position: absolute;
+  width: 732px;
+  height: 894px;
+  object-fit: contain;
+  display: none;
+}
+
+.rectangle {
+  position: absolute;
+  width: 732px;
+  height: 894px;
+  top: 93px;
+  left: 750px;
+  background: #d9d9d9;
+}
+
+/* Suppression des styles des filtres */
+
+.bienvenue-cdrin {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  position: absolute;
+  width: 576px;
+  height: 173px;
+  top: 373px;
+  left: 41px;
+  color: #ffffff;
+  font-family: PP Fragment, var(--default-font-family);
+  font-size: 39px;
+  font-weight: 300;
+  line-height: 51px;
+  text-align: left;
+  z-index: 17;
+}
+
+.bouton-camera {
+  position: absolute;
+  width: 336px;
+  height: 147px;
+  top: 633px;
+  left: 117px;
+  background: #73b2dd;
+  z-index: 25;
+  border-radius: 128px;
+}
+
+/* Nouvelle section Captured View */
+#captured-view {
+  position: absolute;
+  top: 93px;
+  left: 750px;
+  width: 732px;
+  height: 894px;
+  background: #d9d9d9;
+  display: none;
+}
+
+#captured-view canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.restart-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 200px;
+  height: 60px;
+  background: #73b2dd;
+  border: none;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.recommencer {
+  color: #ffffff;
+  font-family: PP Fragment, var(--default-font-family);
+  font-size: 27px;
+  font-weight: 300;
+  line-height: 47px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* QR Code Styles */
+.qr-container {
+  position: absolute;
+  width: 379px;
+  height: 674px;
+  top: 440px;
+  left: 1601px;
+  font-size: 0px;
+  background: #fffda9;
+  z-index: 6;
+}
+
+.qr-download-text {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  position: relative;
+  width: 320px;
+  height: 105px;
+  margin: 92px 0 0 31px;
+  color: #000000;
+  font-family: PP Fragment, var(--default-font-family);
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 33px;
+  text-align: left;
+  z-index: 7;
+}
+
+.qr-code-box {
+  position: relative;
+  width: 335px;
+  height: 335px;
+  margin: 40px 0 0 27px;
+  background: #ffffff;
+  z-index: 9;
+}
+
+.qr-code-text {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  position: absolute;
+  width: 133px;
+  height: 110px;
+  top: 121px;
+  left: 115px;
+  color: #000000;
+  font-family: PP Fragment, var(--default-font-family);
+  font-size: 29px;
+  font-weight: 300;
+  line-height: 38px;
+  text-align: left;
+  text-overflow: initial;
+  z-index: 26;
+  overflow: hidden;
+}
+
+.flash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 999;
+    animation: flash 0.5s ease-out;
+}
+
+@keyframes flash {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.loading-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.loading-background {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background-color: #FFFDA9;
+  opacity: 1;
+  z-index: 1;
+}
+
+@keyframes spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.loading-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  z-index: 2;
+  animation: spin 1.5s linear infinite; 
+}
+
+.hidden {
+    display: none;
+}
+
+.selected {
+  background-color: #FFFDA9 !important;
+}
+
+.loading-active {
+  pointer-events: none;
+}
+
 /* Vue des filtres */
 .choose-filter {
   display: flex;

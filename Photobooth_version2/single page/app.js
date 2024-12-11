@@ -3,15 +3,10 @@ const canvas = document.getElementById('canvas');
 const captureButton = document.getElementById('capture-button');
 const restartButton = document.getElementById('restart-button');
 const initialView = document.getElementById('initial-view');
-const filterView = document.getElementById('filter-view');
+const capturedView = document.getElementById('captured-view');
 const context = canvas.getContext('2d');
-const rectangle13 = document.querySelector('.rectangle-13');
-const rectangle14 = document.querySelector('.rectangle-14');
-
 
 let currentStream = null;
-let isLoading = false;
-let selectedFilter = null;
 let currentImageName = null;
 
 const cameraConfig = {
@@ -30,7 +25,7 @@ function createQRContainer() {
     const qrContainer = document.createElement('div');
     qrContainer.className = 'qr-container';
     qrContainer.innerHTML = `
-        <span class="qr-download-text">Scannez pour télécharger votre image pour partager dans vos réseaux:</span>
+        <span class="qr-download-text">Scannez pour télécharger votre image et la partager sur vos réseaux :</span>
         <div class="qr-code-box">
             <span class="qr-code-text">CODE<br>QR</span>
         </div>
@@ -49,6 +44,7 @@ async function generateQRCode(fileName) {
     const qrCodeContainer = document.querySelector('.qr-code-box');
     qrCodeContainer.innerHTML = ''; 
 
+    // URL brute du fichier sur GitHub
     const rawDownloadUrl = `https://raw.githubusercontent.com/azzahraelkhiati/image-qr-code/main/${fileName}`;
     const encodedDownloadUrl = `${rawDownloadUrl}?dl=1`; 
 
@@ -62,108 +58,18 @@ async function generateQRCode(fileName) {
     });
 }
 
-function createLoadingCircle() {
-    const loadingContainer = document.createElement('div');
-    loadingContainer.className = 'loading-container';
-
-    const loadingBackground = document.createElement('div');
-    loadingBackground.className = 'loading-background';
-
-    const loadingImage = document.createElement('img');
-    loadingImage.src = './Images/Loading.png';
-    loadingImage.className = 'loading-image';
-
-    loadingContainer.appendChild(loadingBackground);
-    loadingContainer.appendChild(loadingImage);
-
-    return loadingContainer;
-}
-
-async function handleFilterSelection(element) {
-    if (isLoading) return;
-    isLoading = true;
-
-    if (selectedFilter) {
-        selectedFilter.classList.remove('selected');
-        selectedFilter.style.backgroundColor = '';
-    }
-
-    element.classList.add('selected');
-    selectedFilter = element;
-
-    const mainRectangle = document.querySelector('.rectangle');
-    const loadingCircleContainer = createLoadingCircle();
-    mainRectangle.appendChild(loadingCircleContainer);
-
-    document.querySelector('.main-container').classList.add('loading-active');
-
-    try {
-        const scriptEndpoint =
-            element === rectangle13
-                ? 'http://localhost:4000/run-stable-diffusion'
-                : element === rectangle14
-                    ? 'http://localhost:4000/run-stable-diffusion-squido'
-                    : null;
-
-        if (scriptEndpoint) {
-            const response = await fetch(scriptEndpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Erreur lors de l\'exécution du script Python');
-            }
-
-            const result = await response.json();
-            console.log('Résultat du script Python:', result);
-
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            const img = new Image();
-            await new Promise((resolve, reject) => {
-                img.onload = resolve;
-                img.onerror = reject;
-                img.src = `http://localhost:4000/output-image?${Date.now()}`;
-            });
-
-            const mainCanvas = document.getElementById('canvas');
-            const rectangleContainer = document.querySelector('.rectangle');
-            const containerHeight = rectangleContainer.clientHeight;
-
-            const scale = containerHeight / img.naturalHeight;
-            const scaledWidth = img.naturalWidth * scale;
-
-            mainCanvas.width = scaledWidth;
-            mainCanvas.height = containerHeight;
-
-            const ctx = mainCanvas.getContext('2d');
-            ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
-            ctx.drawImage(img, 0, 0, scaledWidth, containerHeight);
-
-            mainCanvas.style.position = 'absolute';
-            mainCanvas.style.left = '50%';
-            mainCanvas.style.transform = 'translateX(-50%)';
-            mainCanvas.style.height = '100%';
-            mainCanvas.style.objectFit = 'cover';
-            mainCanvas.style.margin = '0';
-            mainCanvas.style.padding = '0';
-            mainCanvas.style.display = 'block';
-
-            const qrContainer = createQRContainer();
-            if (result && result.fileName) {
-                await generateQRCode(result.fileName);
-            }
-        }
-    } catch (error) {
-        console.error('Erreur lors du chargement:', error);
-    } finally {
-        loadingCircleContainer.remove();
-        isLoading = false;
-        document.querySelector('.main-container').classList.remove('loading-active');
-    }
+async function overlayLogo() {
+    return new Promise((resolve, reject) => {
+        const logo = new Image();
+        logo.src = './Images/CDRIN.png'; // Chemin relatif au logo
+        logo.onload = () => {
+            const logoWidth = canvas.width * 0.2; // 20% de la largeur du canvas
+            const logoHeight = (logo.height / logo.width) * logoWidth;
+            context.drawImage(logo, canvas.width - logoWidth - 20, canvas.height - logoHeight - 20, logoWidth, logoHeight);
+            resolve();
+        };
+        logo.onerror = reject;
+    });
 }
 
 async function pushImageToGit(imageData, fileName) {
@@ -179,11 +85,49 @@ async function pushImageToGit(imageData, fileName) {
             throw new Error(errorText);
         }
 
-        const responseText = await response.text();
-        console.log('Réponse du backend :', responseText);
+        const jsonResponse = await response.json();
+        console.log('Réponse du backend (upload) :', jsonResponse);
+        return jsonResponse.fileName;
     } catch (error) {
         console.error('Erreur lors de l\'envoi au backend :', error);
     }
+}
+
+function createCountdownCircle(onComplete) {
+    const loadingContainer = document.createElement('div');
+    loadingContainer.className = 'loading-container';
+
+    const loadingBackground = document.createElement('div');
+    loadingBackground.className = 'loading-background';
+
+    const countdownText = document.createElement('span');
+    countdownText.className = 'countdown-text';
+    countdownText.textContent = '5';
+
+    loadingContainer.appendChild(loadingBackground);
+    loadingContainer.appendChild(countdownText);
+
+    const mainRectangle = document.querySelector('.rectangle');
+    mainRectangle.appendChild(loadingContainer);
+
+    let count = 5;
+    const interval = setInterval(() => {
+        count--;
+        if (count > 0) {
+            countdownText.textContent = count;
+        } else {
+            clearInterval(interval);
+            loadingContainer.remove();
+            onComplete();
+        }
+    }, 1000);
+}
+
+function createFlashEffect() {
+    const flash = document.createElement('div');
+    flash.className = 'flash';
+    document.body.appendChild(flash);
+    setTimeout(() => flash.remove(), 500);
 }
 
 async function takePicture() {
@@ -221,20 +165,31 @@ async function takePicture() {
                 0, 0, containerWidth, containerHeight 
             );
 
+            await overlayLogo(); // Superposition du logo
+
             const fileName = `image_${Date.now()}.png`;
             const imageData = canvas.toDataURL('image/png');
-            await pushImageToGit(imageData, fileName);
+
+            // Upload et push sur Git
+            const pushedFileName = await pushImageToGit(imageData, fileName);
+            currentImageName = pushedFileName; 
+
+            // On affiche la vue "captured"
+            switchToCapturedView();
+
+            // Génération du QR code pour l'image poussée
+            if (currentImageName) {
+                generateQRCode(currentImageName);
+            }
 
             video.style.display = 'none';
             canvas.style.display = 'block';
 
-            switchToFilterView();
         } catch (error) {
             console.error('Erreur lors de la capture:', error);
         }
     });
 }
-
 
 function startCamera() {
     return navigator.mediaDevices.getUserMedia(cameraConfig)
@@ -272,13 +227,6 @@ function adjustVideoDisplay() {
     }
 }
 
-function createFlashEffect() {
-    const flash = document.createElement('div');
-    flash.className = 'flash';
-    document.body.appendChild(flash);
-    setTimeout(() => flash.remove(), 500);
-}
-
 function stopCamera() {
     if (currentStream) {
         currentStream.getTracks().forEach(track => track.stop());
@@ -286,47 +234,21 @@ function stopCamera() {
     }
 }
 
-function switchToFilterView() {
+function switchToCapturedView() {
     initialView.classList.add('hidden');
-    filterView.classList.remove('hidden');
+    capturedView.classList.remove('hidden');
+    createQRContainer(); // Préparation du container QR
 }
 
 function restartPhoto() {
-    window.location.reload();
-}
-
-function createCountdownCircle(onComplete) {
-    const loadingContainer = document.createElement('div');
-    loadingContainer.className = 'loading-container';
-
-    const loadingBackground = document.createElement('div');
-    loadingBackground.className = 'loading-background';
-
-    const countdownText = document.createElement('span');
-    countdownText.className = 'countdown-text';
-    countdownText.textContent = '5';
-
-    loadingContainer.appendChild(loadingBackground);
-    loadingContainer.appendChild(countdownText);
-
-    const mainRectangle = document.querySelector('.rectangle');
-    mainRectangle.appendChild(loadingContainer);
-
-    let count = 5;
-    const interval = setInterval(() => {
-        count--;
-        if (count > 0) {
-            countdownText.textContent = count;
-        } else {
-            clearInterval(interval);
-            loadingContainer.remove();
-            onComplete();
-        }
-    }, 1000);
+    capturedView.classList.add('hidden');
+    initialView.classList.remove('hidden');
+    video.style.display = 'block';
+    canvas.style.display = 'none';
+    stopCamera();
+    startCamera();
 }
 
 window.addEventListener('load', startCamera);
 captureButton.addEventListener('click', takePicture);
 restartButton.addEventListener('click', restartPhoto);
-rectangle13.addEventListener('click', () => handleFilterSelection(rectangle13));
-rectangle14.addEventListener('click', () => handleFilterSelection(rectangle14));
