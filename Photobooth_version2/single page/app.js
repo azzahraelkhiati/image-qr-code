@@ -42,11 +42,10 @@ async function generateQRCode(fileName) {
     await new Promise(resolve => (qrCodeScript.onload = resolve));
 
     const qrCodeContainer = document.querySelector('.qr-code-box');
-    qrCodeContainer.innerHTML = ''; 
+    qrCodeContainer.innerHTML = '';
 
-    // URL brute du fichier sur GitHub
     const rawDownloadUrl = `https://raw.githubusercontent.com/azzahraelkhiati/image-qr-code/main/${fileName}`;
-    const encodedDownloadUrl = `${rawDownloadUrl}?dl=1`; 
+    const encodedDownloadUrl = `${rawDownloadUrl}?dl=1`;
 
     new QRCode(qrCodeContainer, {
         text: encodedDownloadUrl,
@@ -61,9 +60,9 @@ async function generateQRCode(fileName) {
 async function overlayLogo() {
     return new Promise((resolve, reject) => {
         const logo = new Image();
-        logo.src = './Images/CDRIN.png'; // Chemin relatif au logo
+        logo.src = './Images/CDRIN.png';
         logo.onload = () => {
-            const logoWidth = canvas.width * 0.2; // 20% de la largeur du canvas
+            const logoWidth = canvas.width * 0.2;
             const logoHeight = (logo.height / logo.width) * logoWidth;
             context.drawImage(logo, canvas.width - logoWidth - 20, canvas.height - logoHeight - 20, logoWidth, logoHeight);
             resolve();
@@ -178,7 +177,6 @@ async function takePicture() {
         try {
             context.clearRect(0, 0, containerWidth, containerHeight);
             
-            // Calculate dimensions for maintaining ratio
             const videoRatio = video.videoWidth / video.videoHeight;
             const containerRatio = containerWidth / containerHeight;
             
@@ -200,16 +198,22 @@ async function takePicture() {
             const fileName = `image_${Date.now()}.png`;
             const imageData = canvas.toDataURL('image/png');
 
-            // Hide video and show canvas
+            // Stop the camera stream after capturing
+            stopCamera();
+            
+            // Hide video and show canvas with captured image
             video.style.display = 'none';
             canvas.style.display = 'block';
 
             const pushedFileName = await pushImageToGit(imageData, fileName);
             currentImageName = pushedFileName;
 
-            switchToCapturedView();
+            // Switch to captured view while keeping the canvas visible
+            initialView.classList.add('hidden');
+            capturedView.classList.remove('hidden');
 
             if (currentImageName) {
+                createQRContainer();
                 generateQRCode(currentImageName);
             }
 
@@ -219,15 +223,6 @@ async function takePicture() {
     });
 }
 
-function restartPhoto() {
-    capturedView.classList.add('hidden');
-    initialView.classList.remove('hidden');
-    video.style.display = 'block';
-    canvas.style.display = 'none';
-    stopCamera();
-    startCamera();
-}
-
 function stopCamera() {
     if (currentStream) {
         currentStream.getTracks().forEach(track => track.stop());
@@ -235,13 +230,20 @@ function stopCamera() {
     }
 }
 
-function switchToCapturedView() {
-    initialView.classList.add('hidden');
-    capturedView.classList.remove('hidden');
-    createQRContainer(); // Préparation du container QR
+function restartPhoto() {
+    // Remove QR container if it exists
+    const qrContainer = document.querySelector('.qr-container');
+    if (qrContainer) {
+        qrContainer.remove();
+    }
+    
+    capturedView.classList.add('hidden');
+    initialView.classList.remove('hidden');
+    canvas.style.display = 'none';
+    startCamera();
 }
 
-
+// Initial setup
 window.addEventListener('load', startCamera);
 captureButton.addEventListener('click', takePicture);
 restartButton.addEventListener('click', restartPhoto);

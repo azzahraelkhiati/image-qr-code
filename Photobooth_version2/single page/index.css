@@ -737,25 +737,6 @@ button {
 }
 
 
-
-.recommencer {
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  position: absolute;
-  height: 54.545px;
-  top: 34.515px;
-  left: 121.424px;
-  color: #ffffff;
-  font-family: PP Fragment, var(--default-font-family);
-  font-size: 27px;
-  font-weight: 300;
-  line-height: 47px;
-  text-align: left;
-  white-space: nowrap;
-  z-index: 37;
-}
-
 .rectangle-17 {
   position: absolute;
   width: 403.634px;
