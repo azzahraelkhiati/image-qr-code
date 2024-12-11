@@ -448,8 +448,8 @@ button {
   width: 732px;
   height: 894px;
   background: #d9d9d9;
-  display: none;
 }
+
 
 #captured-view canvas {
   width: 100%;
